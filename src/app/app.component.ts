@@ -224,6 +224,7 @@ import { AccessibilityService, A11y } from './core/services/accessibility.servic
       .maison{letter-spacing:.5em;margin-right:-.5em}
       .hdr-btn{min-width:44px;height:44px}
       .lang-btn{padding:0 6px}
+      .a11y-panel{top:max(8px,env(safe-area-inset-top));right:8px;width:calc(100vw - 16px);max-height:calc(100svh - 16px - env(safe-area-inset-top))}
     }
   `]
 })
