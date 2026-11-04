@@ -216,9 +216,14 @@ import { AccessibilityService, A11y } from './core/services/accessibility.servic
       .maison{font-size:14px}
     }
     @media(max-width:560px){
+      .header-top,.scrolled .header-top{grid-template-columns:44px minmax(0,1fr) auto;gap:4px}
+      .header-left{min-width:0}
+      .brand{min-width:0}
+      .header-actions{gap:0}
       .search-link{display:none}
       .maison{letter-spacing:.5em;margin-right:-.5em}
       .hdr-btn{min-width:44px;height:44px}
+      .lang-btn{padding:0 6px}
     }
   `]
 })

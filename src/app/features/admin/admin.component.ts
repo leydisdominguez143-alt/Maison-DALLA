@@ -369,14 +369,23 @@ const NO_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:40;padding:11px 20px;background:var(--navy);color:#fff;border-left:3px solid var(--gold);border-radius:8px;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
     .reset{text-align:center;margin:10px 0 0}
 
-    @media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+    @media(max-width:1000px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:minmax(0,1fr)}}
     @media(max-width:760px){
       .topbar-in{flex-wrap:wrap;gap:0 14px;padding:8px 16px 0}
       .brand{order:1;padding:10px 0}.user{order:2;margin-left:auto;border:0;padding:0}.user .shop,.user span{display:none}
-      nav{order:3;width:100%;margin:0}
+      nav{order:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;min-width:0;margin:0;overflow:visible}
+      nav button{padding:12px 6px;white-space:normal}
       .content{padding:22px 16px 60px}.grid2{grid-template-columns:1fr}
     }
-    @media(max-width:480px){.stats{grid-template-columns:1fr}.pgrid{grid-template-columns:repeat(2,1fr);gap:12px}.tools input,.tools select{min-width:0;width:100%;max-width:none}}
+    @media(max-width:480px){
+      .stats{grid-template-columns:minmax(0,1fr)}
+      .two,.two>.card{min-width:0}
+      .card{padding:16px}
+      .bars{gap:clamp(4px,2vw,10px)}
+      .bar .v{font-size:clamp(8px,2.5vw,10px);white-space:normal;text-align:center;overflow-wrap:anywhere}
+      .pgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+      .tools input,.tools select{min-width:0;width:100%;max-width:none}
+    }
   `]
 })
 export class AdminComponent {
