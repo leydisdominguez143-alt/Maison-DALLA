@@ -7,9 +7,11 @@ import { ProductService } from '../../core/services/product.service';
 import { BodyMeasurements, BodyType } from '../../core/models/measurements.model';
 import { CartItem } from '../../core/models/cart.model';
 import { MannequinFittingComponent } from './mannequin-fitting.component';
+import { I18nService } from '../../core/services/i18n.service';
 
 type Item = ReturnType<ProductService['products']>[number];
 type Kind = 'vestido' | 'top' | 'pantalon' | 'abrigo';
+type Variant = 'noche' | 'xv' | 'tipico' | 'camisa' | 'blusa' | 'otro';
 
 @Component({
   selector: 'app-mannequin-probador',
@@ -17,52 +19,72 @@ type Kind = 'vestido' | 'top' | 'pantalon' | 'abrigo';
   imports: [FormsModule, RouterLink, MannequinFittingComponent],
   template: `
     <section class="atelier">
-      <div class="stage" aria-label="Probador">
-        <app-mannequin-fitting class="stage-3d" [src]="garmentUrl()" [type]="garmentKind()" (cleared)="selected.set(null)" />
+      <div class="stage" [attr.aria-label]="t('atelier.aria')">
+        <app-mannequin-fitting class="stage-3d" [src]="garmentUrl()" [type]="garmentKind()" [variant]="garmentVariant()" [color]="activeColor()" [size]="activeSize()" (cleared)="selected.set(null)" />
         <div class="stage-copy">
-          <p class="eyebrow">Atelier digital</p>
-          <h1>Tu silueta.<br><em>Tu diseño.</em></h1>
-          <p class="intro">Ajusta tus medidas y elige una pieza del catálogo para verla puesta.</p>
+          <p class="eyebrow">{{ t('atelier.eyebrow') }}</p>
+          <h1>{{ t('atelier.title.a') }}<br><em>{{ t('atelier.title.b') }}</em></h1>
+          <p class="intro">{{ t('atelier.intro') }}</p>
         </div>
       </div>
 
       <aside class="panel">
-        <p class="eyebrow">Medidas personalizadas</p>
-        <div class="size-line"><span>Talla estimada</span><strong>{{mannequin.estimatedSize()}}</strong></div>
+        <p class="eyebrow">{{ t('atelier.measurements') }}</p>
+        <div class="size-line"><span>{{ t('atelier.estimated') }}</span><strong>{{mannequin.estimatedSize()}}</strong></div>
 
         @for (field of fields; track field.key) {
           <div class="measurement">
-            <div class="m-top"><label [for]="field.key">{{field.label}}</label><strong>{{mannequin.measurements()[field.key]}} cm</strong></div>
+            <div class="m-top"><label [for]="field.key">{{t(field.label)}}</label><strong>{{mannequin.measurements()[field.key]}} cm</strong></div>
             <input [id]="field.key" type="range" [min]="field.min" [max]="field.max" [ngModel]="mannequin.measurements()[field.key]" (ngModelChange)="mannequin.updateMeasurement(field.key,$event)">
             <div class="range-labels"><span>{{field.min}}</span><span>{{field.max}}</span></div>
           </div>
         }
 
         <div class="block">
-          <p class="label">Tipo de anatomía</p>
+          <p class="label">{{ t('atelier.body') }}</p>
           <div class="segmented">
-            <button type="button" [class.active]="mannequin.bodyType()==='female'" (click)="changeBodyType('female')">Femenina</button>
-            <button type="button" [class.active]="mannequin.bodyType()==='male'" (click)="changeBodyType('male')">Masculina</button>
+            <button type="button" [class.active]="mannequin.bodyType()==='female'" (click)="changeBodyType('female')">{{ t('atelier.female') }}</button>
+            <button type="button" [class.active]="mannequin.bodyType()==='male'" (click)="changeBodyType('male')">{{ t('atelier.male') }}</button>
           </div>
         </div>
 
         @if (selected(); as p) {
-          <div class="chosen"><span>{{p.name}}</span><strong>B/. {{p.price.toFixed(2)}}</strong></div>
+          <div class="block">
+            <p class="label">{{ t('atelier.garmentSize') }}</p>
+            <div class="sizes" role="group" [attr.aria-label]="t('atelier.garmentSize')">
+              <button type="button" [class.active]="!sizeChoice()" (click)="sizeChoice.set(null)">{{ t('atelier.auto', { size: mannequin.estimatedSize() }) }}</button>
+              @for (s of p.sizes; track s) {
+                <button type="button" [class.active]="sizeChoice()===s" (click)="sizeChoice.set(s)">{{s}}</button>
+              }
+            </div>
+            <p class="fit-note">{{ t('atelier.fit') }}</p>
+          </div>
+          @if (p.colors.length > 1) {
+            <div class="block">
+              <p class="label">{{ t('atelier.color') }}</p>
+              <div class="swatches" role="group" [attr.aria-label]="t('atelier.color')">
+                @for (c of p.colors; track c.hex) {
+                  <button type="button" class="swatch" [class.active]="activeColor()===c.hex" [style.background]="c.hex" [attr.aria-label]="c.name" [title]="c.name" (click)="colorChoice.set(c.hex)"></button>
+                }
+              </div>
+            </div>
+          }
+          <div class="chosen"><span>{{productName(p.id, p.name)}}</span><strong>B/. {{p.price.toFixed(2)}}</strong></div>
         }
-        <button type="button" class="primary" [disabled]="!selected()" (click)="addToCart()">Añadir a la bolsa</button>
-        <a routerLink="/citas" class="secondary">Reservar cita con estas medidas</a>
-        <button type="button" class="reset-button" (click)="mannequin.reset()">Restablecer medidas</button>
+        <button type="button" class="primary" [disabled]="!selected()" (click)="addToCart()">{{ t('atelier.add') }}</button>
+        <a routerLink="/citas" class="secondary">{{ t('atelier.book') }}</a>
+        <button type="button" class="reset-button" (click)="mannequin.reset()">{{ t('atelier.reset') }}</button>
         @if (message()) { <p class="feedback" role="status">{{message()}}</p> }
-        <p class="disclaimer">La talla estimada es orientativa. El ajuste definitivo requiere validar el patrón y las medidas con el atelier.</p>
+        <p class="disclaimer">{{ t('atelier.disclaimer') }}</p>
       </aside>
 
       <div class="catalog">
-        <p class="eyebrow">Catálogo</p>
+        <p class="eyebrow">{{ t('atelier.catalog') }}</p>
         <div class="cards">
           @for (p of catalog(); track p.id) {
             <button type="button" class="card" [class.selected]="selected()?.id===p.id" (click)="select(p)">
-              <img [src]="p.image" [alt]="p.name" loading="lazy">
-              <span class="name">{{p.name}}</span>
+              <img [src]="p.image" [alt]="productName(p.id, p.name)" loading="lazy">
+              <span class="name">{{productName(p.id, p.name)}}</span>
               <span class="price">B/. {{p.price.toFixed(2)}}</span>
             </button>
           }
@@ -100,6 +122,15 @@ type Kind = 'vestido' | 'top' | 'pantalon' | 'abrigo';
     .segmented{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:24px;overflow:hidden}
     .segmented button{padding:12px 6px;border:0;background:transparent;color:#a9a39a;font-size:13px;cursor:pointer}
     .segmented button.active{color:#efc66d;border:1px solid #c99b35;border-radius:24px;background:rgba(212,175,55,.09)}
+    .sizes{display:flex;flex-wrap:wrap;gap:8px}
+    .sizes button{padding:9px 14px;border:1px solid var(--line);border-radius:20px;background:transparent;color:#cfc8bb;font-size:13px;cursor:pointer;transition:border-color .3s,color .3s,background .3s}
+    .sizes button:hover{border-color:var(--gold)}
+    .sizes button.active{color:#efc66d;border-color:#c99b35;background:rgba(212,175,55,.1)}
+    .fit-note{font-size:12px;line-height:1.5;color:#a39c90;margin:10px 0 0}
+    .swatches{display:flex;flex-wrap:wrap;gap:10px}
+    .swatch{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0;transition:transform .3s,border-color .3s}
+    .swatch:hover{transform:scale(1.12)}
+    .swatch.active{border-color:var(--gold);box-shadow:0 0 0 2px #05080d,0 0 0 4px var(--gold)}
     .chosen{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:14px}
     .chosen strong{color:var(--gold-soft);font-weight:500;white-space:nowrap}
     .primary,.secondary,.reset-button{display:flex;justify-content:center;align-items:center;width:100%;min-height:48px;border-radius:28px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .5s var(--ease),color .5s var(--ease),opacity .3s}
@@ -132,6 +163,9 @@ type Kind = 'vestido' | 'top' | 'pantalon' | 'abrigo';
   `]
 })
 export class MannequinProbadorComponent {
+  private readonly tr = inject(I18nService);
+  t = (key: string, vars?: Record<string, string | number>) => this.tr.t(key, vars);
+  productName = (id: number, fallback: string) => this.tr.productName(id, fallback);
   readonly mannequin = inject(MannequinService);
   private readonly cart = inject(CartService);
   private readonly products = inject(ProductService);
@@ -140,11 +174,29 @@ export class MannequinProbadorComponent {
   readonly catalog = computed(() => this.products.products());
   readonly selected = signal<Item | null>(null);
   readonly message = signal('');
+  readonly sizeChoice = signal<string | null>(null);
+  readonly colorChoice = signal<string | null>(null);
+  /** Talla con la que se viste la prenda: la elegida o, si no, la que corresponde a tus medidas. */
+  readonly activeSize = computed(() => this.sizeChoice() ?? this.mannequin.estimatedSize());
+  readonly activeColor = computed(() => this.colorChoice() ?? this.selected()?.colors?.[0]?.hex ?? this.mannequin.garmentColor());
 
-  /** Foto de la prenda: si el producto tiene `tryOn` (PNG sin fondo) se usa esa; si no, su foto normal. */
+  /**
+   * Solo se envuelve una foto si el producto trae `tryOn`: un PNG de la prenda ya recortada, sin modelo ni fondo.
+   * Las fotos de catálogo con personas NO sirven para esto, así que la prenda se arma por código con el color elegido.
+   */
   readonly garmentUrl = computed(() => {
     const p = this.selected();
-    return p ? ((p as unknown as { tryOn?: string }).tryOn ?? p.image) : null;
+    return p ? ((p as unknown as { tryOn?: string }).tryOn ?? null) : null;
+  });
+  /** Estilo de la prenda según la categoría del producto. */
+  readonly garmentVariant = computed<Variant>(() => {
+    const c = String(this.selected()?.category ?? '').toLowerCase();
+    if (/xv/.test(c)) return 'xv';
+    if (/paname|traje/.test(c)) return 'tipico';
+    if (/noche/.test(c)) return 'noche';
+    if (/camis/.test(c)) return 'camisa';
+    if (/blus/.test(c)) return 'blusa';
+    return 'otro';
   });
   readonly garmentKind = computed<Kind | null>(() => {
     const p = this.selected();
@@ -157,13 +209,13 @@ export class MannequinProbadorComponent {
   });
 
   readonly fields: { key: keyof BodyMeasurements; label: string; min: number; max: number }[] = [
-    { key: 'bust', label: 'Busto / Pecho', min: 65, max: 140 },
-    { key: 'waist', label: 'Cintura', min: 50, max: 130 },
-    { key: 'hips', label: 'Cadera', min: 70, max: 145 },
-    { key: 'height', label: 'Estatura', min: 130, max: 220 }
+    { key: 'bust', label: 'atelier.field.bust', min: 65, max: 140 },
+    { key: 'waist', label: 'atelier.field.waist', min: 50, max: 130 },
+    { key: 'hips', label: 'atelier.field.hips', min: 70, max: 145 },
+    { key: 'height', label: 'atelier.field.height', min: 130, max: 220 }
   ];
 
-  select(p: Item): void { this.selected.set(p); this.message.set(''); }
+  select(p: Item): void { this.selected.set(p); this.message.set(''); this.sizeChoice.set(null); this.colorChoice.set(null); }
 
   /** Al cambiar de anatomía se cargan medidas típicas de cada una, para que la figura se vea natural. */
   changeBodyType(type: BodyType): void {
@@ -179,11 +231,11 @@ export class MannequinProbadorComponent {
     if (!p) return;
     const c = this.mannequin.configuration();
     const item: CartItem = {
-      lineId: crypto.randomUUID(), productId: p.id, name: p.name,
-      unitPrice: p.price, quantity: 1, color: c.garmentColor,
-      size: c.estimatedSize, madeToMeasure: true, measurements: { ...c.measurements }
+      lineId: crypto.randomUUID(), productId: p.id, name: this.productName(p.id, p.name),
+      unitPrice: p.price, quantity: 1, color: this.activeColor(),
+      size: this.activeSize(), madeToMeasure: true, measurements: { ...c.measurements }
     };
     this.cart.agregar(item);
-    this.message.set(`${p.name} añadido a la bolsa con tus medidas.`);
+    this.message.set(this.t('atelier.added', { name: this.productName(p.id, p.name) }));
   }
 }

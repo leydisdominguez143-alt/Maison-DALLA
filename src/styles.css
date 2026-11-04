@@ -42,3 +42,73 @@ html:focus-within { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+html[data-theme="light"] {
+  --bg: #faf7f1;
+  --bg-2: #f3eee4;
+  --surface: #fff;
+  --surface-2: #f1ece1;
+  --text: #1b1a17;
+  --text-2: #3a352d;
+  --muted: #5f584c;
+  --line: rgba(125, 90, 20, .32);
+  --gold: #7d5a14;
+  --on-gold: #fff;
+  --glow: #efe3c8;
+  --dalla-gold: #7d5a14;
+  --dalla-gold-light: #7d5a14;
+  --dalla-ivory: #1b1a17;
+  --dalla-muted: #5f584c;
+  --dalla-border: rgba(125, 90, 20, .32);
+  --dalla-black: #faf7f1;
+  --dalla-navy: #f3eee4;
+  color-scheme: light;
+}
+html[data-theme="light"] body,
+html[data-theme="light"] main { background: var(--bg) !important; color: var(--text) !important; }
+html[data-theme="light"] body { transition: background-color .4s, color .4s; }
+html[data-theme="light"] .panel { background: linear-gradient(145deg, #fff, #f8f4ec); }
+html[data-theme="light"] input:not([type=range]):not([type=color]),
+html[data-theme="light"] select,
+html[data-theme="light"] textarea { background: #fff; color: #1b1a17; border-color: rgba(45, 38, 25, .25); }
+html[data-theme="light"] .button.secondary { color: var(--text); border-color: var(--line); }
+html[data-theme="light"] .summary > div,
+html[data-theme="light"] .inventory-item { border-color: var(--line); }
+html[data-theme="light"] .category-list button { color: var(--text-2); }
+html[data-theme="light"] .product-image { background: var(--surface-2); }
+html[data-theme="light"] .tag { background: rgba(255, 255, 255, .92); color: var(--gold); }
+html[data-theme="light"] .quick-add { background: #fff; color: var(--gold); border-color: var(--gold); }
+html[data-theme="light"] app-mannequin-probador {
+  --atelier-bg: #faf7f1;
+  --atelier-text: #1b1a17;
+  --atelier-muted: #5f584c;
+  --atelier-border: rgba(125, 90, 20, .32);
+  --ink: #1b1a17;
+  --muted: #5f584c;
+  --gold: #7d5a14;
+  --gold-soft: #7d5a14;
+  --line: rgba(125, 90, 20, .32);
+}
+html[data-theme="light"] app-mannequin-probador .atelier,
+html[data-theme="light"] app-mannequin-probador .panel,
+html[data-theme="light"] app-mannequin-probador .catalog { background: var(--atelier-bg) !important; color: var(--atelier-text); }
+html[data-theme="light"] app-mannequin-probador .stage { background: radial-gradient(ellipse 45% 60% at 62% 50%, #efe3c8 0, transparent 70%), linear-gradient(180deg, #faf7f1, #f3eee4); }
+html[data-theme="light"] app-mannequin-probador .panel { background: linear-gradient(155deg, #fff, #f3eee4) !important; border-color: var(--atelier-border); }
+html[data-theme="light"] app-mannequin-probador .intro,
+html[data-theme="light"] app-mannequin-probador .segmented button,
+html[data-theme="light"] app-mannequin-probador .sizes button,
+html[data-theme="light"] app-mannequin-probador .secondary { color: var(--atelier-text); }
+html[data-theme="light"] app-mannequin-probador .fit-note,
+html[data-theme="light"] app-mannequin-probador .disclaimer,
+html[data-theme="light"] app-mannequin-probador .range-labels { color: var(--atelier-muted); }
+html[data-theme="light"] app-mannequin-probador .card { background: #fff; color: var(--atelier-text); border-color: var(--atelier-border); }
+html[data-theme="light"] app-mannequin-probador .measurement { border-color: var(--atelier-border); }
+html[data-theme="light"] app-mannequin-probador .size-line strong,
+html[data-theme="light"] app-mannequin-probador .segmented button.active,
+html[data-theme="light"] app-mannequin-probador .sizes button.active { color: #5d430d; }
+html[data-theme="light"] app-admin .warning { background: #fff8e7; color: #614500; }
+html[data-theme="light"] app-admin .warning span { color: #614500; }
+html.a11y-contrast .panel { background: #000 !important; color: #fff !important; border-color: #fff !important; }
+html.a11y-contrast input,
+html.a11y-contrast select,
+html.a11y-contrast textarea { background: #000 !important; color: #fff !important; border-color: #fff !important; }

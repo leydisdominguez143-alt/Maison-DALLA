@@ -12,13 +12,6 @@ const HERO_IMG = 'assets/images/FONDO-PAREJA.png';
 // ======================================================================
 //  TEXTO DE LA FRANJA EN MOVIMIENTO: cambia estas frases a tu gusto
 // ======================================================================
-const MARQUEE = [
-  'Envíos a todo el país',
-  'Moda con carácter',
-  'Hecho a tu medida',
-  'Agenda tu cita',
-];
-
 @Component({
   standalone: true,
   selector: 'app-home',
@@ -42,12 +35,12 @@ const MARQUEE = [
     </section>
 
     <!-- ============ FRANJA EN MOVIMIENTO ============ -->
-    <div class="marquee" role="region" [attr.aria-label]="marquee[0]">
+    <div class="marquee" role="region" [attr.aria-label]="t(marquee[0])">
       <div class="marquee-track">
         @for (copy of [0, 1]; track copy) {
           <ul [attr.aria-hidden]="copy === 1 ? 'true' : null">
             @for (k of marquee; track k) {
-              <li>{{ k }}<i aria-hidden="true">✦</i></li>
+              <li>{{ t(k) }}<i aria-hidden="true">✦</i></li>
             }
           </ul>
         }
@@ -67,13 +60,13 @@ const MARQUEE = [
                 @if (isFailed('p' + p.id)) {
                   <div class="ph" aria-hidden="true"><span>D</span><small>{{ t('home.soon') }}</small></div>
                 } @else {
-                  <img [src]="p.image" [alt]="p.name" (error)="markFailed('p' + p.id)" [attr.fetchpriority]="n === 0 ? 'high' : null">
+                  <img [src]="p.image" [alt]="productName(p.id, p.name)" (error)="markFailed('p' + p.id)" [attr.fetchpriority]="n === 0 ? 'high' : null">
                 }
               </div>
               <div class="info">
                 <span class="info-num">0{{ n + 1 }} / 0{{ slides().length }}</span>
-                <span class="info-cat">{{ p.category }}</span>
-                <h2>{{ p.name }}</h2>
+                <span class="info-cat">{{ productCategory(p.category) }}</span>
+                <h2>{{ productName(p.id, p.name) }}</h2>
                 <p>B/. {{ p.price.toFixed(2) }}</p>
                 <a routerLink="/catalogo" class="info-link">{{ t('home.view') }} →</a>
               </div>
@@ -82,7 +75,7 @@ const MARQUEE = [
           <button type="button" class="arrow prev" (click)="go(-1)" [attr.aria-label]="t('home.prev')">←</button>
           <div class="dots">
             @for (p of slides(); track p.id; let n = $index) {
-              <button type="button" class="dot" [class.on]="n === index()" (click)="index.set(n)" [attr.aria-label]="p.name" [attr.aria-current]="n === index() ? 'true' : null">
+              <button type="button" class="dot" [class.on]="n === index()" (click)="index.set(n)" [attr.aria-label]="productName(p.id, p.name)" [attr.aria-current]="n === index() ? 'true' : null">
                 @if (n === index() && playing()) { <i></i> }
               </button>
             }
@@ -105,7 +98,7 @@ const MARQUEE = [
               @if (isFailed('c' + c.name)) { <div class="ph" aria-hidden="true"><span>D</span></div> }
               @else { <img [src]="c.image" alt="" loading="lazy" (error)="markFailed('c' + c.name)"> }
               <span class="cat-text">
-                <strong>{{ c.name }}</strong>
+                <strong>{{ productCategory(c.name) }}</strong>
                 <small>{{ c.count === 1 ? t('home.cats.one') : t('home.cats.many', { n: c.count }) }}</small>
               </span>
               <span class="go" aria-hidden="true">→</span>
@@ -149,10 +142,10 @@ const MARQUEE = [
           <a class="card rv" [style.--d]="(n * 90) + 'ms'" routerLink="/catalogo">
             <div class="thumb">
               @if (isFailed('f' + p.id)) { <div class="ph" aria-hidden="true"><span>D</span></div> }
-              @else { <img [src]="p.image" [alt]="p.name" loading="lazy" (error)="markFailed('f' + p.id)"> }
+              @else { <img [src]="p.image" [alt]="productName(p.id, p.name)" loading="lazy" (error)="markFailed('f' + p.id)"> }
               <span class="peek">{{ t('home.view') }} →</span>
             </div>
-            <div class="card-info"><span>{{ p.category }}</span><h3>{{ p.name }}</h3><p>B/. {{ p.price.toFixed(2) }}</p></div>
+            <div class="card-info"><span>{{ productCategory(p.category) }}</span><h3>{{ productName(p.id, p.name) }}</h3><p>B/. {{ p.price.toFixed(2) }}</p></div>
           </a>
         }
       </div>
@@ -318,9 +311,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   t = (key: string, vars?: Record<string, string | number>) => this.tr.t(key, vars);
+  productName = (id: number, fallback: string) => this.tr.productName(id, fallback);
+  productCategory = (category: string) => this.tr.productCategory(category);
 
   readonly heroImg = HERO_IMG;
-  readonly marquee = MARQUEE;
+  readonly marquee = ['home.marquee.shipping', 'home.marquee.style', 'home.marquee.custom', 'home.marquee.appointment'];
 
   readonly slides = computed(() => this.products.products().slice(0, 6));
   readonly featured = computed(() => {

@@ -54,7 +54,8 @@ public/assets/
 ## Qué está implementado
 - Angular standalone components y lazy loading por ruta.
 - Servicios reactivos con Signals para carrito, productos, medidas y navegación.
-- Interfaz oscura de lujo, azul noche, marfil y dorado.
+- Interfaz global con modo oscuro/claro, preferencia guardada y paleta adaptable en todas las rutas.
+- Controles globales de accesibilidad y traducciones ES/EN/PT para la navegación, páginas y productos de muestra.
 - Catálogo de demostración con búsqueda, categorías y productos de muestra.
 - Carrito reactivo con subtotal, código demo `DALLA10`, descuento e ITBMS calculado al 7%.
 - Probador Three.js con controles de cámara, maniquí geométrico, color y proporciones ilustrativas.
@@ -80,7 +81,10 @@ Este ZIP es un scaffold frontend funcional, no un sistema comercial listo para c
 
 ## Actualización UX
 - Añadida la página `/quienes-somos`.
-- Añadidos controles globales de idioma (ES/EN/PT como selector de preferencia visual) y accesibilidad (texto grande, contraste, subrayado de enlaces y reducción de animaciones).
+- Añadidos controles globales de idioma (ES/EN/PT), tema claro/oscuro y accesibilidad (texto grande, contraste, subrayado de enlaces, reducción de animaciones, lectura en voz alta y otras opciones).
+- El idioma seleccionado actualiza la navegación, textos de las páginas, formularios, productos de muestra y el atributo `lang` del documento.
+- El modo claro y las preferencias de accesibilidad se aplican globalmente y se conservan entre visitas.
+- En `/admin`, la sección «Cambiar textos de las páginas» permite editar el contenido por página e idioma sin mostrar claves ni tocar código; los cambios se guardan en el navegador actual y se pueden restaurar por página.
 - Integrado el canvas Three.js dentro del escenario del atelier, con rotación mediante arrastre y zoom.
 - El visor utiliza un maniquí geométrico de demostración. Los controles alteran proporciones de manera ilustrativa; no predicen el ajuste real de una prenda. Para un avatar realista se requiere un modelo GLB preparado con rig/morph targets y prendas compatibles.
-- El selector de idioma actualmente cambia la preferencia mostrada; la traducción integral de todos los textos y productos requiere conectar archivos de traducción a los componentes.
+- Los datos nuevos que se introduzcan manualmente en el panel de administración permanecen en el idioma en que fueron escritos.

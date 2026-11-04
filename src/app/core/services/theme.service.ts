@@ -12,6 +12,7 @@ export class ThemeService {
       const t = this.theme();
       if (typeof document === 'undefined') return;
       document.documentElement.dataset['theme'] = t;
+      document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', t === 'light' ? '#faf7f1' : '#080c14');
       try { localStorage.setItem('dalla-theme', t); } catch { /* sin almacenamiento */ }
     });
   }

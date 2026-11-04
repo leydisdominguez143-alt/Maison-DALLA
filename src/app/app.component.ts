@@ -5,9 +5,6 @@ import { ThemeService } from './core/services/theme.service';
 import { I18nService, LANGS, Lang } from './core/services/i18n.service';
 import { AccessibilityService, A11y } from './core/services/accessibility.service';
 
-/** Páginas ya adaptadas al modo claro. En las demás se mantiene el modo oscuro hasta migrarlas. */
-const THEMED = ['/', '/catalogo'];
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -69,7 +66,7 @@ const THEMED = ['/', '/catalogo'];
         </div>
       </div>
 
-      <nav class="main-nav" aria-label="Principal">
+      <nav class="main-nav" [attr.aria-label]="t('aria.nav')">
         @for (l of links; track l.path) {
           <a [routerLink]="l.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: l.path === '/'}">{{ t(l.k) }}</a>
         }
@@ -77,7 +74,7 @@ const THEMED = ['/', '/catalogo'];
     </header>
 
     @if (menuOpen()) {
-      <nav class="mobile-sheet" aria-label="Menú móvil">
+      <nav class="mobile-sheet" [attr.aria-label]="t('aria.mobileMenu')">
         @for (l of links; track l.path) { <a [routerLink]="l.path" (click)="menuOpen.set(false)">{{ t(l.k) }}</a> }
         <a routerLink="/citas" class="hdr-book" (click)="menuOpen.set(false)">{{ t('cta.book') }}</a>
       </nav>
@@ -123,15 +120,6 @@ const THEMED = ['/', '/catalogo'];
       --line:rgba(217,184,106,.28); --gold:#d9b86a; --on-gold:#0a0e16; --glow:#172131;
       --header-h:160px; color-scheme:dark;
     }
-    html[data-theme="light"][data-page="themed"]{
-      --bg:#faf7f1; --bg-2:#f3eee4; --surface:#ffffff; --surface-2:#f1ece1;
-      --text:#1b1a17; --text-2:#3a352d; --muted:#5f584c;
-      --line:rgba(125,90,20,.32); --gold:#7d5a14; --on-gold:#ffffff; --glow:#efe3c8; color-scheme:light;
-      --dalla-gold:#7d5a14; --dalla-gold-light:#7d5a14; --dalla-ivory:#1b1a17; --dalla-muted:#5f584c; --dalla-border:rgba(125,90,20,.32);
-    }
-    html[data-theme="light"][data-page="themed"] body{background:var(--bg)!important;color:var(--text)!important}
-    body{transition:background-color .4s,color .4s}
-
     /* ---------- ACCESIBILIDAD (se aplica a todo el sitio) ---------- */
     .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
     .skip-link{position:fixed;left:16px;top:-80px;z-index:200;padding:14px 22px;background:var(--gold);color:var(--on-gold);font-weight:600;transition:top .2s}
@@ -146,7 +134,6 @@ const THEMED = ['/', '/catalogo'];
     html.a11y-cursor,html.a11y-cursor *{cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'><path d='M4 2l16 9-7 2 4 8-3 1-4-8-6 5z' fill='black' stroke='white' stroke-width='1.5'/></svg>") 4 2,auto!important}
     html.a11y-contrast{--text:#fff;--text-2:#fff;--muted:#f0f0f0;--line:#fff;--gold:#ffd54a;--on-gold:#000;--bg:#000;--bg-2:#000;--surface:#000;--surface-2:#111;--dalla-muted:#f0f0f0;--dalla-border:#fff;--dalla-gold:#ffd54a;--dalla-gold-light:#ffd54a;--dalla-ivory:#fff}
     html.a11y-contrast body{background:#000!important;color:#fff!important}
-
     /* ---------- CABECERA ---------- */
     .site-header{position:sticky;top:0;z-index:50;padding:0 4vw;background:var(--bg);border-bottom:1px solid var(--line);transition:background .5s}
     .site-header.scrolled{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(14px) saturate(1.2)}
@@ -263,13 +250,8 @@ export class AppComponent {
   private lastCount = this.cart.itemCount();
 
   constructor() {
-    const setPage = (url: string) => {
-      const path = url.split('?')[0].split('#')[0];
-      document.documentElement.dataset['page'] = THEMED.includes(path) ? 'themed' : 'legacy';
-    };
-    setPage(location.pathname);
     this.router.events.subscribe(e => {
-      if (e instanceof NavigationEnd) { setPage(e.urlAfterRedirects); this.menuOpen.set(false); this.langOpen.set(false); }
+      if (e instanceof NavigationEnd) { this.menuOpen.set(false); this.langOpen.set(false); }
     });
     // El contador del carrito "salta" cuando se añade algo
     effect(() => {

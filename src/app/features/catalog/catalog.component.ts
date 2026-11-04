@@ -16,16 +16,16 @@ import { I18nService } from '../../core/services/i18n.service';
       <header class="catalog-heading"><span class="eyebrow">{{ t('cat.eyebrow') }}</span><h1 class="page-heading">{{ t('cat.title.a') }} <em>{{ t('cat.title.b') }}</em></h1><p class="muted">{{ t('cat.sub') }}</p></header>
       <div class="filters">
         <div class="category-list">
-          @for (cat of categories(); track cat) { <button type="button" [class.selected]="activeCategory() === cat" (click)="category.set(cat)">{{ cat === 'Todas' ? t('cat.all') : cat }}</button> }
+          @for (cat of categories(); track cat) { <button type="button" [class.selected]="activeCategory() === cat" (click)="category.set(cat)">{{ cat === 'Todas' ? t('cat.all') : productCategory(cat) }}</button> }
         </div>
-        <input class="search" [(ngModel)]="query" [placeholder]="t('cat.search')" aria-label="Buscar productos">
+        <input class="search" [(ngModel)]="query" [placeholder]="t('cat.search')" [attr.aria-label]="t('cat.search')">
       </div>
       <div class="product-grid">
         @for (product of filtered(); track product.id) {
           <article class="product-card">
-            <div class="product-image"><img [src]="product.image" [alt]="product.name" loading="lazy"><span class="tag">{{ product.madeToMeasure ? t('cat.tag.made') : t('cat.tag.col') }}</span><button class="quick-add" (click)="add(product)" [attr.aria-label]="t('cat.add') + ' ' + product.name">+</button></div>
-            <div class="product-meta"><span>{{ product.category }}</span><span>B/. {{ product.price.toFixed(2) }}</span></div>
-            <h2>{{ product.name }}</h2><p>{{ product.description }}</p>
+            <div class="product-image"><img [src]="product.image" [alt]="productName(product.id, product.name)" loading="lazy"><span class="tag">{{ product.madeToMeasure ? t('cat.tag.made') : t('cat.tag.col') }}</span><button class="quick-add" (click)="add(product)" [attr.aria-label]="t('cat.add') + ' ' + productName(product.id, product.name)">+</button></div>
+            <div class="product-meta"><span>{{ productCategory(product.category) }}</span><span>B/. {{ product.price.toFixed(2) }}</span></div>
+            <h2>{{ productName(product.id, product.name) }}</h2><p>{{ productDescription(product.id, product.description) }}</p>
             <div class="card-actions"><button (click)="add(product)">{{ t('cat.add') }}</button>@if(product.madeToMeasure){<a routerLink="/atelier">{{ t('cat.custom') }} →</a>}</div>
           </article>
         }
@@ -46,6 +46,9 @@ export class CatalogComponent {
   private readonly tr = inject(I18nService);
   private readonly route = inject(ActivatedRoute);
   t = (key: string, vars?: Record<string, string | number>) => this.tr.t(key, vars);
+  productName = (id: number, fallback: string) => this.tr.productName(id, fallback);
+  productDescription = (id: number, fallback: string) => this.tr.productDescription(id, fallback);
+  productCategory = (category: string) => this.tr.productCategory(category);
 
   /** "Todas" + las categorías que realmente tienen los productos (se actualiza solo). */
   readonly categories = computed(() => ['Todas', ...new Set(this.productService.products().map(p => p.category as string))]);
@@ -66,7 +69,7 @@ export class CatalogComponent {
     const cat = this.activeCategory();
     return this.productService.products().filter(p =>
       (cat === 'Todas' || p.category === cat) &&
-      (!q || `${p.name} ${p.description} ${p.category}`.toLowerCase().includes(q))
+      (!q || `${p.name} ${p.description} ${p.category} ${this.productName(p.id, p.name)} ${this.productDescription(p.id, p.description)} ${this.productCategory(p.category)}`.toLowerCase().includes(q))
     );
   });
   reset(): void { this.category.set('Todas'); this.query = ''; }
@@ -79,7 +82,7 @@ export class CatalogComponent {
       madeToMeasure: product.madeToMeasure,
       ...(product.madeToMeasure ? { measurements: { ...config.measurements } } : {})
     });
-    this.message = this.t('cat.added', { name: product.name });
+    this.message = this.t('cat.added', { name: this.productName(product.id, product.name) });
     setTimeout(() => this.message = '', 2600);
   }
 }

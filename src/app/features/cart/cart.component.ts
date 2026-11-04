@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
+import { I18nService } from '../../core/services/i18n.service';
 
 @Component({
   standalone: true,
@@ -8,15 +9,15 @@ import { CartService } from '../../core/services/cart.service';
   imports: [RouterLink],
   template: `
     <section class="container cart-page">
-      <span class="eyebrow">MAISON DALLA / TU SELECCIÓN</span><h1 class="page-heading">Tu <em>bolsa.</em></h1>
+      <span class="eyebrow">{{ t('cart.selection') }}</span><h1 class="page-heading">{{ t('cart.title.a') }} <em>{{ t('cart.title.b') }}</em></h1>
       @if(cart.items().length===0){
-        <div class="empty panel"><span class="empty-icon">♧</span><h2>Tu bolsa está esperando una pieza especial.</h2><p class="muted">Explora la colección o crea un diseño personalizado en el atelier.</p><div><a class="button" routerLink="/catalogo">Explorar colección</a><a class="button secondary" routerLink="/atelier">Ir al atelier</a></div></div>
+        <div class="empty panel"><span class="empty-icon">♧</span><h2>{{ t('cart.empty.title') }}</h2><p class="muted">{{ t('cart.empty.text') }}</p><div><a class="button" routerLink="/catalogo">{{ t('cart.explore') }}</a><a class="button secondary" routerLink="/atelier">{{ t('cart.atelier') }}</a></div></div>
       } @else {
         <div class="cart-layout"><div class="cart-items">
           @for(item of cart.items();track item.lineId){
-            <article class="cart-item panel"><div class="swatch" [style.background]="item.color"></div><div class="item-info"><span class="eyebrow">{{item.madeToMeasure?'CONFECCIÓN A MEDIDA':'COLECCIÓN'}}</span><h2>{{item.name}}</h2><p>Talla: {{item.size}} · Color: {{item.color}}</p>@if(item.measurements){<small>Medidas guardadas: pecho {{item.measurements.bust}} cm · cintura {{item.measurements.waist}} cm · cadera {{item.measurements.hips}} cm · estatura {{item.measurements.height}} cm</small>}<div class="quantity"><button (click)="change(item.lineId,item.quantity-1)" [disabled]="item.quantity<=1">−</button><span>{{item.quantity}}</span><button (click)="change(item.lineId,item.quantity+1)">+</button><button class="remove" (click)="cart.remove(item.lineId)">Eliminar</button></div></div><strong>B/. {{(item.unitPrice*item.quantity).toFixed(2)}}</strong></article>
+            <article class="cart-item panel"><div class="swatch" [style.background]="item.color"></div><div class="item-info"><span class="eyebrow">{{item.madeToMeasure ? t('cart.made') : t('cart.collection')}}</span><h2>{{productName(item.productId, item.name)}}</h2><p>{{ t('cart.sizeColor', { size: item.size, color: item.color }) }}</p>@if(item.measurements){<small>{{ t('cart.measurements', { bust: item.measurements.bust, waist: item.measurements.waist, hips: item.measurements.hips, height: item.measurements.height }) }}</small>}<div class="quantity"><button (click)="change(item.lineId,item.quantity-1)" [disabled]="item.quantity<=1" [attr.aria-label]="t('cart.decrease')">−</button><span>{{item.quantity}}</span><button (click)="change(item.lineId,item.quantity+1)" [attr.aria-label]="t('cart.increase')">+</button><button class="remove" (click)="cart.remove(item.lineId)">{{ t('cart.remove') }}</button></div></div><strong>B/. {{(item.unitPrice*item.quantity).toFixed(2)}}</strong></article>
           }
-        </div><aside class="summary panel"><h2>Resumen del pedido</h2><div><span>Subtotal</span><strong>B/. {{cart.subtotal().toFixed(2)}}</strong></div><div><span>Descuento</span><strong>− B/. {{cart.discount().toFixed(2)}}</strong></div><div><span>Base imponible</span><strong>B/. {{cart.taxableAmount().toFixed(2)}}</strong></div><div><span>ITBMS (7% ilustrativo)</span><strong>B/. {{cart.itbms().toFixed(2)}}</strong></div><div class="total"><span>Total estimado</span><strong>B/. {{cart.total().toFixed(2)}}</strong></div><label for="promo">Código promocional</label><div class="promo"><input id="promo" #promo placeholder="Código"><button (click)="applyPromo(promo.value)">Aplicar</button></div>@if (promoMessage()) {<p class="promo-message">{{ promoMessage() }}</p>}<button class="button checkout" (click)="checkout()">Continuar al pago</button><p class="legal">El pago aún no está conectado a una pasarela. El ITBMS y los descuentos deben validarse según la normativa aplicable.</p></aside></div>
+        </div><aside class="summary panel"><h2>{{ t('cart.summary') }}</h2><div><span>{{ t('cart.subtotal') }}</span><strong>B/. {{cart.subtotal().toFixed(2)}}</strong></div><div><span>{{ t('cart.discount') }}</span><strong>− B/. {{cart.discount().toFixed(2)}}</strong></div><div><span>{{ t('cart.taxable') }}</span><strong>B/. {{cart.taxableAmount().toFixed(2)}}</strong></div><div><span>{{ t('cart.tax') }}</span><strong>B/. {{cart.itbms().toFixed(2)}}</strong></div><div class="total"><span>{{ t('cart.total') }}</span><strong>B/. {{cart.total().toFixed(2)}}</strong></div><label for="promo">{{ t('cart.promo') }}</label><div class="promo"><input id="promo" #promo [placeholder]="t('cart.code')"><button (click)="applyPromo(promo.value)">{{ t('cart.apply') }}</button></div>@if (promoMessage()) {<p class="promo-message">{{ promoMessage() }}</p>}<button class="button checkout" (click)="checkout()">{{ t('cart.checkout') }}</button><p class="legal">{{ t('cart.legal') }}</p></aside></div>
       }
       @if(checkoutMessage){<div class="notice" role="status">{{checkoutMessage}}</div>}
     </section>
@@ -28,13 +29,16 @@ import { CartService } from '../../core/services/cart.service';
 })
 export class CartComponent {
   readonly cart = inject(CartService);
+  private readonly tr = inject(I18nService);
+  t = (key: string, vars?: Record<string, string | number>) => this.tr.t(key, vars);
+  productName = (id: number, fallback: string) => this.tr.productName(id, fallback);
   readonly promoMessage = signal('');
   checkoutMessage = '';
   change(lineId:string,quantity:number):void { this.cart.updateQuantity(lineId,quantity); }
   applyPromo(code:string):void {
     const normalized=code.trim().toUpperCase();
-    if(normalized==='DALLA10'){this.cart.applyPromotion({code:normalized,discountPercent:10});this.promoMessage.set('Descuento de demostración del 10% aplicado.');}
-    else {this.cart.applyPromotion(null);this.promoMessage.set(normalized?'Código no válido. Prueba DALLA10 (demo).':'Introduce un código.');}
+    if(normalized==='DALLA10'){this.cart.applyPromotion({code:normalized,discountPercent:10});this.promoMessage.set(this.t('cart.promo.success'));}
+    else {this.cart.applyPromotion(null);this.promoMessage.set(this.t(normalized?'cart.promo.invalid':'cart.promo.empty'));}
   }
-  checkout():void { this.checkoutMessage='Checkout de demostración: conecta un backend y una pasarela de pago antes de aceptar transacciones reales.'; }
+  checkout():void { this.checkoutMessage=this.t('cart.checkout.notice'); }
 }

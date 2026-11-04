@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { I18nService } from '../../core/services/i18n.service';
 
 @Component({
   standalone: true,
@@ -7,11 +8,11 @@ import { FormsModule } from '@angular/forms';
   imports: [FormsModule],
   template: `
     <section class="container appointments">
-      <div class="intro"><span class="eyebrow">UNA EXPERIENCIA PRIVADA</span><h1 class="page-heading">El atelier,<br><em>para ti.</em></h1><p class="muted">Reserva una conversación con nuestro equipo para explorar tejidos, siluetas y posibilidades de confección.</p></div>
+      <div class="intro"><span class="eyebrow">{{ t('appointments.eyebrow') }}</span><h1 class="page-heading">{{ t('appointments.title.a') }}<br><em>{{ t('appointments.title.b') }}</em></h1><p class="muted">{{ t('appointments.intro') }}</p></div>
       <form class="panel booking" (ngSubmit)="submit()">
-        <span class="eyebrow">SOLICITUD DE CITA</span><h2>Cuéntanos qué imaginas.</h2>
-        <div class="form-grid"><div><label for="name">Nombre completo</label><input id="name" name="name" [(ngModel)]="form.name" required></div><div><label for="email">Correo electrónico</label><input id="email" name="email" type="email" [(ngModel)]="form.email" required></div><div><label for="date">Fecha preferida</label><input id="date" name="date" type="date" [min]="today" [(ngModel)]="form.date" required></div><div><label for="type">Tipo de cita</label><select id="type" name="type" [(ngModel)]="form.type"><option>Confección a medida</option><option>Asesoría de estilo</option><option>Accesorios y colección</option><option>Consulta virtual</option></select></div><div class="full"><label for="details">¿Qué te gustaría crear?</label><textarea id="details" name="details" rows="4" [(ngModel)]="form.details" placeholder="Cuéntanos sobre la ocasión, el diseño o tus ideas..."></textarea></div></div>
-        <button class="button" type="submit">Enviar solicitud ↗</button><p class="muted fine">Esta demo no envía datos a un servidor. Se necesita backend para confirmar y administrar citas.</p>
+        <span class="eyebrow">{{ t('appointments.form') }}</span><h2>{{ t('appointments.prompt') }}</h2>
+        <div class="form-grid"><div><label for="name">{{ t('appointments.name') }}</label><input id="name" name="name" [(ngModel)]="form.name" required></div><div><label for="email">{{ t('appointments.email') }}</label><input id="email" name="email" type="email" [(ngModel)]="form.email" required></div><div><label for="date">{{ t('appointments.date') }}</label><input id="date" name="date" type="date" [min]="today" [(ngModel)]="form.date" required></div><div><label for="type">{{ t('appointments.type') }}</label><select id="type" name="type" [(ngModel)]="form.type"><option value="tailoring">{{ t('appointments.option.tailoring') }}</option><option value="style">{{ t('appointments.option.style') }}</option><option value="collection">{{ t('appointments.option.collection') }}</option><option value="virtual">{{ t('appointments.option.virtual') }}</option></select></div><div class="full"><label for="details">{{ t('appointments.details') }}</label><textarea id="details" name="details" rows="4" [(ngModel)]="form.details" [placeholder]="t('appointments.placeholder')"></textarea></div></div>
+        <button class="button" type="submit">{{ t('appointments.send') }}</button><p class="muted fine">{{ t('appointments.disclaimer') }}</p>
         @if(message()){<p class="success" role="status">{{message()}}</p>}
       </form>
     </section>
@@ -22,8 +23,10 @@ import { FormsModule } from '@angular/forms';
   `]
 })
 export class AppointmentsComponent {
+  private readonly tr = inject(I18nService);
+  t = (key: string, vars?: Record<string, string | number>) => this.tr.t(key, vars);
   readonly today = new Date().toISOString().slice(0,10);
   readonly message = signal('');
-  form = {name:'',email:'',date:'',type:'Confección a medida',details:''};
-  submit():void { this.message.set(`Gracias${this.form.name ? ', '+this.form.name : ''}. La solicitud está validada en esta demo; todavía no se ha enviado al atelier.`); }
+  form = {name:'',email:'',date:'',type:'tailoring',details:''};
+  submit():void { this.message.set(this.t('appointments.success', { name: this.form.name ? ', ' + this.form.name : '' })); }
 }
