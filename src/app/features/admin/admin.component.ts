@@ -6,7 +6,7 @@ import { AdminDataService, Order, OrderStatus, STATUSES, orderTotal } from './ad
 import { ProductService } from '../../core/services/product.service';
 
 type Section = 'dashboard' | 'productos' | 'ventas' | 'clientes' | 'reportes';
-interface Draft { id: number | null; name: string; price: number; category: ProductCategory; image: string; description: string; madeToMeasure: boolean; featured: boolean; sizes: string[]; colors: ProductColor[]; }
+interface Draft { id: number | null; name: string; price: number; category: ProductCategory; image: string; backImage: string; description: string; madeToMeasure: boolean; featured: boolean; sizes: string[]; colors: ProductColor[]; }
 
 // ---- ACCESO DE DEMOSTRACIÓN ------------------------------------------------------------------
 // Esto NO es seguridad real: cualquiera con las herramientas del navegador puede saltárselo.
@@ -217,7 +217,25 @@ const NO_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
                 <div class="f"><label for="f-name">Nombre</label><input id="f-name" name="name" [(ngModel)]="d.name" required></div>
                 <div class="f"><label for="f-price">Precio (B/.)</label><input id="f-price" name="price" type="number" min="0" step="0.01" [(ngModel)]="d.price" required></div>
                 <div class="f"><label for="f-cat">Categoría</label><select id="f-cat" name="cat" [(ngModel)]="d.category">@for (c of categories; track c) { <option [value]="c">{{ c }}</option> }</select></div>
-                <div class="f"><label for="f-img">Imagen (ruta o URL)</label><input id="f-img" name="img" [(ngModel)]="d.image" placeholder="assets/images/…"></div>
+              </div>
+              <div class="grid2">
+                <div class="f image-field">
+                  <label for="f-img">Imagen frontal (ruta o URL)</label>
+                  <input id="f-img" name="img" [(ngModel)]="d.image" placeholder="assets/images/…">
+                  <label class="upload-btn btn ghost" for="f-upload">Subir desde este equipo</label>
+                  <input id="f-upload" class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onImageSelected($event, 'front')" [disabled]="imageProcessing()">
+                  @if (imageProcessing()) { <p class="upload-hint" role="status">Optimizando imagen…</p> }
+                  @else { <p class="upload-hint">JPG, PNG, WebP o GIF. Se optimiza y se guarda en este navegador.</p> }
+                  @if (d.image) { <img class="image-preview" [src]="d.image" alt="Vista previa frontal" (error)="imgError($event)"> }
+                </div>
+                <div class="f image-field">
+                  <label for="f-back-img">Imagen trasera (opcional)</label>
+                  <input id="f-back-img" name="backImg" [(ngModel)]="d.backImage" placeholder="assets/images/…">
+                  <label class="upload-btn btn ghost" for="f-back-upload">Subir desde este equipo</label>
+                  <input id="f-back-upload" class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onImageSelected($event, 'back')" [disabled]="imageProcessing()">
+                  <p class="upload-hint">Añádela cuando tengas la foto de la parte trasera.</p>
+                  @if (d.backImage) { <img class="image-preview" [src]="d.backImage" alt="Vista previa trasera" (error)="imgError($event)"> }
+                </div>
               </div>
               <div class="f"><label for="f-desc">Descripción</label><textarea id="f-desc" name="desc" rows="3" [(ngModel)]="d.description"></textarea></div>
               <fieldset class="f"><legend>Tallas disponibles</legend>
@@ -238,7 +256,7 @@ const NO_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
                 <label><input type="checkbox" name="feat" [(ngModel)]="d.featured"> Destacado en la tienda</label>
               </div>
               @if (formError()) { <p class="err" role="alert">{{ formError() }}</p> }
-              <div class="modal-actions"><button type="button" class="btn ghost" (click)="closeEditor()">Cancelar</button><button type="submit" class="btn primary">Guardar</button></div>
+              <div class="modal-actions"><button type="button" class="btn ghost" (click)="closeEditor()">Cancelar</button><button type="submit" class="btn primary" [disabled]="imageProcessing()">Guardar</button></div>
             </form>
           </div>
         }
@@ -361,6 +379,12 @@ const NO_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .f{margin-bottom:14px;border:0;padding:0;min-width:0}.f label,.f legend{display:block;margin-bottom:5px;padding:0;font-size:12px;font-weight:600}
     .f input:not([type=checkbox]):not([type=color]),.f select,.f textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+    .image-field .upload-btn{display:inline-flex;margin-top:8px;cursor:pointer}
+    .image-field .file-input{position:absolute;width:1px;height:1px;padding:0!important;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0!important}
+    .image-field:focus-within .upload-btn{outline:2px solid var(--gold-d);outline-offset:2px}
+    .upload-hint{margin:6px 0 0;color:var(--muted);font-size:12px}
+    .image-preview{display:block;width:120px;height:150px;object-fit:cover;margin-top:10px;border:1px solid var(--line);border-radius:8px;background:#f5f3ee}
+    .btn:disabled{opacity:.6;cursor:wait;transform:none}
     .chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;margin:0!important}
     .chip.on{background:#faf3df;border-color:var(--gold);color:#6f5a1c}.chip input{accent-color:var(--gold-d)}
     .colorrow{display:flex;gap:8px;margin-bottom:8px}.colorrow input[type=color]{width:44px;height:40px;padding:2px;border:1px solid var(--line);border-radius:8px;background:#fff}
@@ -410,6 +434,7 @@ export class AdminComponent {
   readonly cQuery = signal('');
 
   readonly draft = signal<Draft | null>(null);
+  readonly imageProcessing = signal(false);
   readonly toDelete = signal<Product | null>(null);
   readonly formError = signal('');
   readonly toast = signal('');
@@ -464,7 +489,7 @@ export class AdminComponent {
       .filter(c => !q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
   });
 
-  // ---- utilidades de la plantilla ----
+  // ---- utilidades de la vista ----
   money(n: number): string { return 'B/. ' + n.toLocaleString('es-PA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   fmtDate(iso: string): string { return new Date(iso + 'T00:00:00').toLocaleDateString('es-PA', { day: '2-digit', month: 'short', year: 'numeric' }); }
   total(o: Order): number { return orderTotal(o); }
@@ -488,10 +513,68 @@ export class AdminComponent {
   openEditor(p: Product | null): void {
     this.formError.set('');
     this.draft.set(p
-      ? { id: p.id, name: p.name, price: p.price, category: p.category, image: p.image, description: p.description, madeToMeasure: p.madeToMeasure, featured: !!p.featured, sizes: [...p.sizes], colors: p.colors.map(c => ({ ...c })) }
-      : { id: null, name: '', price: 0, category: 'Vestidos de noche', image: '', description: '', madeToMeasure: true, featured: false, sizes: ['S', 'M', 'L'], colors: [{ name: 'Negro', hex: '#101018' }] });
+      ? { id: p.id, name: p.name, price: p.price, category: p.category, image: p.image, backImage: p.backImage ?? '', description: p.description, madeToMeasure: p.madeToMeasure, featured: !!p.featured, sizes: [...p.sizes], colors: p.colors.map(c => ({ ...c })) }
+      : { id: null, name: '', price: 0, category: 'Vestidos de noche', image: '', backImage: '', description: '', madeToMeasure: true, featured: false, sizes: ['S', 'M', 'L'], colors: [{ name: 'Negro', hex: '#101018' }] });
   }
   closeEditor(): void { this.draft.set(null); this.formError.set(''); }
+  async onImageSelected(event: Event, side: 'front' | 'back'): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const draft = this.draft();
+    input.value = '';
+    if (!file || !draft) return;
+    this.formError.set('');
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      this.formError.set('Elige una imagen JPG, PNG, WebP o GIF.');
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      this.formError.set('La imagen debe pesar menos de 12 MB.');
+      return;
+    }
+
+    this.imageProcessing.set(true);
+    try {
+      const dataUrl = await this.optimizeImage(file);
+      if (this.draft() === draft) {
+        if (side === 'front') draft.image = dataUrl;
+        else draft.backImage = dataUrl;
+      }
+    } catch {
+      if (this.draft() === draft) this.formError.set('No se pudo procesar la imagen. Prueba con otro archivo.');
+    } finally {
+      this.imageProcessing.set(false);
+    }
+  }
+  private optimizeImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        if (image.naturalWidth > 12000 || image.naturalHeight > 12000) {
+          reject(new Error('La imagen tiene dimensiones demasiado grandes.'));
+          return;
+        }
+        const scale = Math.min(1, 1400 / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(image.naturalWidth * scale);
+        canvas.height = Math.round(image.naturalHeight * scale);
+        const context = canvas.getContext('2d');
+        if (!context) { reject(new Error('No se pudo preparar la imagen.')); return; }
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+          if (!blob) { reject(new Error('No se pudo comprimir la imagen.')); return; }
+          const reader = new FileReader();
+          reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('No se pudo leer la imagen.'));
+          reader.onerror = () => reject(new Error('No se pudo leer la imagen.'));
+          reader.readAsDataURL(blob);
+        }, 'image/webp', 0.8);
+      };
+      image.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('No se pudo abrir la imagen.')); };
+      image.src = objectUrl;
+    });
+  }
   toggleSize(d: Draft, s: string): void { d.sizes = d.sizes.includes(s) ? d.sizes.filter(x => x !== s) : SIZES.filter(x => x === s || d.sizes.includes(x)); }
   addColor(d: Draft): void { d.colors = [...d.colors, { name: '', hex: '#c9a24b' }]; }
   removeColor(d: Draft, i: number): void { d.colors = d.colors.filter((_, k) => k !== i); }
@@ -503,7 +586,7 @@ export class AdminComponent {
     if (!d.sizes.length) { this.formError.set('Elige al menos una talla.'); return; }
     const id = d.id ?? Math.max(0, ...this.products.products().map(p => p.id)) + 1;
     const colors = d.colors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), hex: c.hex }));
-    this.products.save({ id, name, price, category: d.category, image: d.image.trim(), description: d.description.trim(), madeToMeasure: d.madeToMeasure, featured: d.featured, sizes: d.sizes, colors: colors.length ? colors : [{ name: 'Negro', hex: '#101018' }] });
+    this.products.save({ id, name, price, category: d.category, image: d.image.trim(), ...(d.backImage.trim() ? { backImage: d.backImage.trim() } : {}), description: d.description.trim(), madeToMeasure: d.madeToMeasure, featured: d.featured, sizes: d.sizes, colors: colors.length ? colors : [{ name: 'Negro', hex: '#101018' }] });
     this.notify(d.id ? 'Producto actualizado.' : 'Producto creado.');
     this.closeEditor();
   }

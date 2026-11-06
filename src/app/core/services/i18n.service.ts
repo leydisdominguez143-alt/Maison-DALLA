@@ -59,6 +59,7 @@ const D: Record<string, [string, string, string]> = {
   'home.lead': ['Piezas creadas alrededor de ti. Una nueva expresión de la elegancia, diseñada para acompañar tu individualidad.', 'Pieces created around you. A new expression of elegance, designed to accompany your individuality.', 'Peças criadas ao seu redor. Uma nova expressão da elegância, desenhada para acompanhar a sua individualidade.'],
   'home.cta1': ['Reservar cita', 'Book an appointment', 'Agendar horário'],
   'home.cta2': ['Ver colección', 'View collection', 'Ver coleção'],
+  'home.scroll': ['Descubrir', 'Discover', 'Descobrir'],
   'home.carousel': ['Piezas de la colección', 'Collection pieces', 'Peças da coleção'],
   'home.prev': ['Pieza anterior', 'Previous piece', 'Peça anterior'],
   'home.next': ['Pieza siguiente', 'Next piece', 'Próxima peça'],
@@ -91,6 +92,14 @@ const D: Record<string, [string, string, string]> = {
   'cat.all': ['Todas', 'All', 'Todas'],
   'cat.search': ['Buscar una pieza...', 'Search for a piece...', 'Buscar uma peça...'],
   'cat.add': ['Añadir a la bolsa', 'Add to bag', 'Adicionar à sacola'],
+  'cat.details': ['Ver pieza', 'View piece', 'Ver peça'],
+  'cat.close': ['Cerrar detalles', 'Close details', 'Fechar detalhes'],
+  'cat.views': ['Vistas de la pieza', 'Piece views', 'Vistas da peça'],
+  'cat.front': ['Frente', 'Front', 'Frente'],
+  'cat.back': ['Espalda', 'Back', 'Costas'],
+  'cat.backSoon': ['Vista trasera próximamente', 'Back view coming soon', 'Vista traseira em breve'],
+  'cat.description': ['Descripción', 'Description', 'Descrição'],
+  'cat.sizes': ['Tallas', 'Sizes', 'Tamanhos'],
   'cat.custom': ['Personalizar', 'Customize', 'Personalizar'],
   'cat.tag.made': ['A medida', 'Made to measure', 'Sob medida'],
   'cat.tag.col': ['Colección', 'Collection', 'Coleção'],
@@ -138,7 +147,7 @@ const D: Record<string, [string, string, string]> = {
   'contact.read': ['Leer nota de privacidad ↘', 'Read privacy note ↘', 'Ler nota de privacidade ↘'],
   'contact.data': ['PRIVACIDAD Y DATOS', 'PRIVACY AND DATA', 'PRIVACIDADE E DADOS'],
   'contact.care': ['Tu información, con cuidado.', 'Your information, handled with care.', 'Suas informações, com cuidado.'],
-  'contact.disclaimer': ['Esta plantilla no envía datos a un servidor ni implementa autenticación. Antes de producción, publica una política revisada legalmente, explica el uso de las medidas corporales, establece plazos de conservación y habilita solicitudes de acceso o eliminación de datos.', 'This template does not send data to a server or implement authentication. Before production, publish a legally reviewed policy, explain how body measurements are used, set retention periods and enable data access or deletion requests.', 'Este modelo não envia dados a um servidor nem implementa autenticação. Antes da produção, publique uma política revisada juridicamente, explique o uso das medidas corporais, estabeleça prazos de retenção e habilite solicitações de acesso ou exclusão de dados.'],
+  'contact.disclaimer': ['Este formulario es demostrativo: los datos no se envían a un servidor y no hay autenticación. Antes de recopilar información real, publica una política de privacidad revisada legalmente, explica el uso de las medidas corporales, establece plazos de conservación y habilita solicitudes de acceso o eliminación de datos.', 'This form is for demonstration: data is not sent to a server and authentication is not enabled. Before collecting real information, publish a legally reviewed privacy policy, explain how body measurements are used, set retention periods and enable data access or deletion requests.', 'Este formulário é demonstrativo: os dados não são enviados a um servidor e não há autenticação. Antes de coletar informações reais, publique uma política de privacidade revisada juridicamente, explique o uso das medidas corporais, estabeleça prazos de retenção e habilite solicitações de acesso ou exclusão de dados.'],
   // bolsa
   'cart.selection': ['MAISON DALLA / TU SELECCIÓN', 'MAISON DALLA / YOUR SELECTION', 'MAISON DALLA / SUA SELEÇÃO'],
   'cart.title.a': ['Tu', 'Your', 'Sua'],
@@ -296,7 +305,7 @@ const D: Record<string, [string, string, string]> = {
 };
 const IDX: Record<Lang, number> = { es: 0, en: 1, pt: 2 };
 
-/** Idioma del sitio. Uso en plantillas: {{ t('clave') }}. Se recuerda entre visitas y actualiza <html lang>. */
+/** Idioma del sitio. Uso en vistas: {{ t('clave') }}. Se recuerda entre visitas y actualiza <html lang>. */
 @Injectable({ providedIn: 'root' })
 export class I18nService {
   readonly lang = signal<Lang>(this.initial());

@@ -32,6 +32,9 @@ const HERO_IMG = 'assets/images/FONDO-PAREJA.png';
           <a routerLink="/catalogo" class="cta ghost">{{ t('home.cta2') }}</a>
         </div>
       </div>
+      <a class="scroll-cue" href="#coleccion" [attr.aria-label]="t('home.scroll')">
+        <span>{{ t('home.scroll') }}</span><i aria-hidden="true"></i>
+      </a>
     </section>
 
     <!-- ============ FRANJA EN MOVIMIENTO ============ -->
@@ -49,7 +52,7 @@ const HERO_IMG = 'assets/images/FONDO-PAREJA.png';
 
     <!-- ============ CARRUSEL ANCHO ============ -->
     @if (slides().length) {
-      <section class="stage-wrap">
+      <section class="stage-wrap" id="coleccion">
         <div class="showcase" role="region" aria-roledescription="carousel" [attr.aria-label]="t('home.carousel')"
              (mouseenter)="paused.set(true)" (mouseleave)="paused.set(false)"
              (focusin)="paused.set(true)" (focusout)="paused.set(false)"
@@ -176,18 +179,23 @@ const HERO_IMG = 'assets/images/FONDO-PAREJA.png';
     .cta.ghost:hover{border-color:var(--gold);color:var(--gold)}
     .actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:42px}
 
-    /* ---------- HERO CON IMAGEN (completa, sin overlay) ---------- */
-    .hero{position:relative;overflow:hidden;display:grid;background:var(--bg)}
-    .hero-bg{grid-area:1/1;align-self:center;display:block;width:100%;height:auto}
-    .hero-copy{grid-area:1/1;align-self:center;z-index:1;max-width:min(740px,58%);padding:56px 4vw;color:#f4efe6;text-shadow:0 2px 18px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.6)}
+    /* ---------- HERO INMERSIVO ---------- */
+    .hero{position:relative;overflow:hidden;display:grid;isolation:isolate;background:var(--bg)}
+    .hero::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,transparent 28%,rgba(5,8,13,.18) 48%,rgba(5,8,13,.72) 100%),linear-gradient(0deg,rgba(5,8,13,.24),transparent 24%)}
+    .hero-bg{grid-area:1/1;align-self:center;display:block;width:100%;height:auto;animation:hero-drift 24s ease-in-out infinite alternate}
+    .hero-copy{grid-area:1/1;justify-self:end;align-self:center;position:relative;z-index:1;max-width:min(760px,49%);padding:56px 6vw 56px 2vw;color:#f4efe6;text-shadow:0 2px 18px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.6)}
     .hero .eyebrow{color:#f0cd8e}
-    h1{font:500 clamp(60px,8vw,140px)/.95 var(--font-editorial);letter-spacing:-.045em;margin:30px 0 32px;color:#f4efe6}
+    h1{font:500 clamp(54px,6.2vw,108px)/.95 var(--font-editorial);letter-spacing:-.045em;margin:30px 0 32px;color:#f4efe6}
     h1 .line{display:block}
     h1 em{color:#f0cd8e;font-weight:400;font-style:italic}
     .lead{max-width:580px;font-size:clamp(18px,1.5vw,22px);line-height:1.7;color:#f4efe6;margin:0}
     .hero .cta{text-shadow:none}
     .hero .cta.ghost{color:#f4efe6;border-color:rgba(244,239,230,.7);background:rgba(5,8,13,.25)}
     .hero .cta.ghost:hover{border-color:#e9c17c;color:#e9c17c}
+    .scroll-cue{position:absolute;z-index:2;bottom:28px;left:50%;display:flex;flex-direction:column;align-items:center;gap:12px;transform:translateX(-50%);color:rgba(244,239,230,.86);font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+    .scroll-cue i{width:1px;height:40px;background:linear-gradient(#e9c17c,rgba(233,193,124,0));transform-origin:top;animation:cue-pulse 1.8s ease-in-out infinite}
+    @keyframes hero-drift{to{transform:scale(1.07)}}
+    @keyframes cue-pulse{50%{transform:scaleY(.65);opacity:.55}}
 
     /* ---------- FRANJA EN MOVIMIENTO ---------- */
     .marquee{overflow:hidden;background:var(--gold);color:var(--on-gold);border-block:1px solid var(--gold)}
@@ -282,14 +290,16 @@ const HERO_IMG = 'assets/images/FONDO-PAREJA.png';
     @media (prefers-reduced-motion:reduce){
       .reveal,.rv{animation:none;opacity:1;transform:none;transition:none}
       .slide,.slide img,.hero-bg{transition:none}
+      .hero-bg,.scroll-cue i{animation:none}
       .marquee-track{animation:none}
     }
     .cta:focus-visible,.text-link:focus-visible,.card:focus-visible,.cat:focus-visible,.info-link:focus-visible,.arrow:focus-visible,.dot:focus-visible,.tab:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
     @media(max-width:1000px){
-      .hero{min-height:78svh}
-      .hero-bg{position:absolute;inset:0;height:100%;object-fit:cover}
-      .hero-copy{max-width:100%;padding:36px 6vw}
+      .hero{min-height:clamp(620px,78svh,860px)}
+      .hero::after{background:linear-gradient(90deg,rgba(5,8,13,.06) 20%,rgba(5,8,13,.72) 100%),linear-gradient(0deg,rgba(5,8,13,.35),transparent 30%)}
+      .hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:42% center}
+      .hero-copy{max-width:56%;padding:36px 5vw 100px 2vw}
       .how{grid-template-columns:1fr}
       .showcase{height:88vh;min-height:0}
       .slide{grid-template-columns:1fr;grid-template-rows:55% 1fr}
@@ -299,8 +309,14 @@ const HERO_IMG = 'assets/images/FONDO-PAREJA.png';
       .dots{left:84px;right:84px}
     }
     @media(max-width:560px){
-      h1{font-size:64px}
+      h1{font-size:56px;margin:18px 0 20px}
       .actions .cta{flex:1 1 100%}
+      .hero{min-height:clamp(680px,calc(100svh - 76px),840px)}
+      .hero-bg{object-position:38% center}
+      .hero::after{background:linear-gradient(0deg,rgba(5,8,13,.92),rgba(5,8,13,.72) 38%,rgba(5,8,13,.08) 76%)}
+      .hero-copy{justify-self:stretch;align-self:end;max-width:100%;padding:28px 24px 92px}
+      .lead{font-size:17px}
+      .scroll-cue{bottom:18px}
     }
   `]
 })

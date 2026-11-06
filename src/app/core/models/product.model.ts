@@ -7,6 +7,7 @@ export interface Product {
   price: number;
   category: ProductCategory;
   image: string;
+  backImage?: string;
   madeToMeasure: boolean;
   sizes: string[];
   colors: ProductColor[];

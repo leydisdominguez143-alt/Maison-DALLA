@@ -1,6 +1,6 @@
 # Maison DALLA — Atelier Digital
 
-Plantilla de frontend para una experiencia de e-commerce de moda de diseñador con Angular standalone, Signals y Three.js.
+Sitio frontend para una experiencia de e-commerce de moda de diseñador con Angular standalone, Signals y Three.js.
 
 ## Requisitos
 - Node.js LTS compatible con Angular 18
@@ -62,7 +62,7 @@ public/assets/
 - CRUD de catálogo solo en memoria para mostrar la interfaz administrativa.
 
 ## Importante antes de producción
-Este ZIP es un scaffold frontend funcional, no un sistema comercial listo para cobrar:
+Este proyecto es una experiencia frontend funcional, no un sistema comercial listo para cobrar:
 - Los productos y precios son datos de ejemplo. Algunas imágenes se cargan desde URLs externas de Unsplash; sustitúyelas por fotografías propias/licenciadas.
 - `public/assets/models/mannequin-female.glb` es opcional y no viene incluido. Si lo agregas, el visor intentará cargarlo; si no existe, utiliza el maniquí geométrico.
 - El maniquí es estilizado; no constituye simulación de ajuste ni predicción antropométrica validada. Las tallas son ilustrativas.
